@@ -1,0 +1,17 @@
+{
+  "name": "rabbitmq-monitor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^2.6.1",
+    "request": "^2.88.0",
+    "underscore": "^1.9.1"
+  }
+}
