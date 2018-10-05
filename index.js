@@ -4,8 +4,11 @@ const colors = require('colors');
 
 const util = require('./lib/util')
 const cacheUtil = require('./lib/cache')
+const strategy = require('./lib/strategy')
 const config = require('./rabbitmq_config')
 const api = require('./lib/api')
+
+const INTERVAL = 5
 
 function map(info) {
   return _.chain(info).result('items').map(function(item) {
@@ -53,25 +56,15 @@ function monitor(params, callback) {
 
 function analysis(datas, callback) {
   var now = util.formatDate(new Date())
-  var MAX_NUM = 10
+
+  var flag = false
   callback(null, _.chain(datas).filter(function(data) {return data.messages != 0}).sortBy('messages').each(function(msg, messages) {
     var cache = {}
+    if (!flag) {
+        strategy.simple(msg)
+        flag = true
+    }
 
-    var cache_key = [msg.name, 'messages'].join('.')
-    cacheUtil.circle(MAX_NUM, cache_key, msg['messages'])
-    var values = cacheUtil.get(cache_key)
-    var prev = values[0], isWarning = false
-    for (var i = 1; i < values.length; i++) {
-      if (values[i] >= prev) {
-        prev = values[i]
-      } else {
-        isWarning = true
-        break;
-      }
-    }
-    if (!isWarning && values.length >= MAX_NUM) {
-      console.log(colors.red(msg.name + ' 最近' + MAX_NUM + '次的消息总数:' + values.join(',') + ' 可能存在堵的风险'))
-    }
 
     var rets = _.reduce(['name', 'state', 'messages', 'messages_unacknowledged', 'messages_ready'], function(mem, key) {
       if (!cache[key]) {
@@ -86,18 +79,14 @@ function analysis(datas, callback) {
   }).value())
 }
 
-
-
 console.log('时间\tname\tstate\tready\tunack\ttotal')
 function m() {
     monitor({}, function(err, result) {
       if (err) {
         console.log('err:', err)
       }
-      setTimeout(m, 10 * 1000)
+      setTimeout(m, INTERVAL * 1000)
     })
 }
 
 m()
-
-// console.log(new Buffer('gisi_prd:gisi2016').toString('base64'))
