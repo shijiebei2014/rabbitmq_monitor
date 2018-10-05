@@ -11,6 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "async": "^2.6.1",
+    "colors": "^1.3.2",
+    "kvo": "^1.0.3",
     "request": "^2.88.0",
     "underscore": "^1.9.1"
   }
